@@ -40,7 +40,7 @@ function drawTriangle(vertexes) {
     gl.shaderSource(vertexShader, vertexShaderSourceCode);
     gl.compileShader(vertexShader);
     if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-        const errorMessage = gl.getShaderInfoLog(vertexShader);
+        const errorMessage = gl.getShaderInfoLog();
         showError(`Failed to compile vertex shader: ${errorMessage}`);
         return;
     }
@@ -51,7 +51,7 @@ function drawTriangle(vertexes) {
     out vec4 outputColor;
 
     void main() {
-        outputColor = vec4(0.294, 0.0, 0.51, 1.0);
+        outputColor = vec4(1.0, 0.0, 0.0, 1.0);
     }`;
 
     const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -103,7 +103,7 @@ function drawCircle(res, radius, centerX=0, centerY=0) {
             const cos = radius*0.75*Math.cos(angle);
             const sin = radius*Math.sin(angle);
             drawTriangle([0.0+centerX, 0.0+centerY, cos+centerX, 0.0+centerY, cos+centerX, sin+centerY]);
-            drawTriangle([0.0+centerX, 0.0+centerY, 0.0+centerX, sin+centerY, cos+centerx, sin+centerY]);
+            drawTriangle([0.0+centerX, 0.0+centerY, 0.0+centerX, sin+centerY, cos+centerX, sin+centerY]);
         }
     } catch (e){
         showError(`Uncaught JavaScript exception: ${e}`);
@@ -111,7 +111,7 @@ function drawCircle(res, radius, centerX=0, centerY=0) {
 }
 
 try {
-    drawCircle(150, 0.1);
+    drawCircle(500, 1, 0, 0);
 } catch (e){
     showError(`Uncaught JavaScript exception: ${e}`);
 }
