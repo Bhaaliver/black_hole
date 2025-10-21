@@ -11,6 +11,51 @@ if (!gl) {
 gl.clearColor(0.08, 0.08, 0.08, 1.0);
 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+//vertex shaders
+const vertexShaderSourceCode = `#version 300 es
+    precision mediump float;
+
+    in vec2 vertexPosition;
+
+    void main() {
+        gl_Position = vec4(vertexPosition, 0.0, 1.0);
+    }`;
+
+const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vertexShader, vertexShaderSourceCode);
+gl.compileShader(vertexShader);
+if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+    const errorMessage = gl.getShaderInfoLog();
+    showError(`Failed to compile vertex shader: ${errorMessage}`);
+}
+
+//fragment shaders
+const fragmentShaderSourceCode = `#version 300 es
+    precision mediump float;
+
+    out vec4 outputColor;
+
+    void main() {
+        outputColor = vec4(1.0, 0.0, 0.0, 1.0);
+}`;
+const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(fragmentShader, fragmentShaderSourceCode);
+gl.compileShader(fragmentShader);
+if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+    const errorMessage = gl.getShaderInfoLog(fragmentShader);
+    showError(`Failed to compile fragment shader: ${errorMessage}`);
+}
+
+const drawTriangleProgram = gl.createProgram();
+gl.attachShader(drawTriangleProgram, vertexShader);
+gl.attachShader(drawTriangleProgram, fragmentShader);
+gl.linkProgram(drawTriangleProgram);
+if (!gl.getProgramParameter(drawTriangleProgram, gl.LINK_STATUS)) {
+    const errorMessage = gl.getProgramInfoLog(drawTriangleProgram);
+    showError(`Failed to link GPU program: ${errorMessage}`);
+}
+
+
 function showError(errorText) {
   const errorBoxDiv = document.getElementById('error-box');
   const errorSpan = document.createElement('p');
@@ -19,6 +64,7 @@ function showError(errorText) {
   console.error(errorText);
 }
 
+
 function drawTriangle(vertexes) {
     const triangleVertices = vertexes;
     const triangleGeoCpuBuffer = new Float32Array(triangleVertices);
@@ -26,52 +72,6 @@ function drawTriangle(vertexes) {
     const triangleGeoBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, triangleGeoBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, triangleGeoCpuBuffer, gl.STATIC_DRAW);
-
-    const vertexShaderSourceCode = `#version 300 es
-    precision mediump float;
-    
-    in vec2 vertexPosition;
-
-    void main() {
-        gl_Position = vec4(vertexPosition, 0.0, 1.0);
-    }`;
-
-    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-    gl.shaderSource(vertexShader, vertexShaderSourceCode);
-    gl.compileShader(vertexShader);
-    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-        const errorMessage = gl.getShaderInfoLog();
-        showError(`Failed to compile vertex shader: ${errorMessage}`);
-        return;
-    }
-
-    const fragmentShaderSourceCode = `#version 300 es
-    precision mediump float;
-    
-    out vec4 outputColor;
-
-    void main() {
-        outputColor = vec4(1.0, 0.0, 0.0, 1.0);
-    }`;
-
-    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(fragmentShader, fragmentShaderSourceCode);
-    gl.compileShader(fragmentShader);
-    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-        const errorMessage = gl.getShaderInfoLog(fragmentShader);
-        showError(`Failed to compile fragment shader: ${errorMessage}`);
-        return;
-    }
-
-    const drawTriangleProgram = gl.createProgram();
-    gl.attachShader(drawTriangleProgram, vertexShader);
-    gl.attachShader(drawTriangleProgram, fragmentShader);
-    gl.linkProgram(drawTriangleProgram);
-    if (!gl.getProgramParameter(drawTriangleProgram, gl.LINK_STATUS)) {
-        const errorMessage = gl.getProgramInfoLog(drawTriangleProgram);
-        showError(`Failed to link GPU program: ${errorMessage}`);
-        return;
-    }
 
     const vertexPositionAttributeLocation = gl.getAttribLocation(drawTriangleProgram, 'vertexPosition');
     if (vertexPositionAttributeLocation < 0) {
@@ -94,7 +94,6 @@ function drawTriangle(vertexes) {
         2 * Float32Array.BYTES_PER_ELEMENT,
         0
     );
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
 function drawCircle(res, radius, centerX=0, centerY=0) {
@@ -103,7 +102,9 @@ function drawCircle(res, radius, centerX=0, centerY=0) {
             const cos = radius*0.75*Math.cos(angle);
             const sin = radius*Math.sin(angle);
             drawTriangle([0.0+centerX, 0.0+centerY, cos+centerX, 0.0+centerY, cos+centerX, sin+centerY]);
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
             drawTriangle([0.0+centerX, 0.0+centerY, 0.0+centerX, sin+centerY, cos+centerX, sin+centerY]);
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
         }
     } catch (e){
         showError(`Uncaught JavaScript exception: ${e}`);
@@ -111,7 +112,7 @@ function drawCircle(res, radius, centerX=0, centerY=0) {
 }
 
 try {
-    drawCircle(500, 1, 0, 0);
+    drawCircle(5000, 1, 0, 0);
 } catch (e){
     showError(`Uncaught JavaScript exception: ${e}`);
 }
