@@ -36,7 +36,7 @@ const fragmentShaderSourceCode = `#version 300 es
     out vec4 outputColor;
 
     void main() {
-        outputColor = vec4(1.0, 0.0, 0.0, 1.0);
+        outputColor = vec4(0.0, 0.0, 0.0, 1.0);
 }`;
 const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 gl.shaderSource(fragmentShader, fragmentShaderSourceCode);
@@ -112,7 +112,7 @@ function drawCircle(res, radius, centerX=0, centerY=0) {
 }
 
 try {
-    drawCircle(5000, 1, 0, 0);
+    drawCircle(500, 0.5, 0.5, 0);
 } catch (e){
     showError(`Uncaught JavaScript exception: ${e}`);
 }
